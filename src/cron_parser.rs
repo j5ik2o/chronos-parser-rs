@@ -85,13 +85,47 @@ pub fn min_digit<'a, Input>() -> impl Parser<Input, Output=Expr>
     where
         Input: Stream<Token=char>,
         Input::Error: ParseError<Input::Token, Input::Range, Input::Position> {
-    let m_00_09 = char('0').with(digit('0' , '9'))
+    let m_00_09 = char('0').with(digit('0', '9'))
         .or(digit('0', '9')).map(|e| ValueExpr(e as u32 - 48));
-    let m_10_59 = digit('1', '5').and(digit('0', '9')).map(|(e1, e2) | {
+    let m_10_59 = digit('1', '5').and(digit('0', '9')).map(|(e1, e2)| {
         let n = (e1 as u32 - 48) * 10 + (e2 as u32 - 48);
         ValueExpr(n)
     });
-    attempt(m_10_59).or(attempt(m_00_09))
+    m_10_59.or(m_00_09)
+}
+
+pub fn hour_digit<'a, Input>() -> impl Parser<Input, Output=Expr>
+    where
+        Input: Stream<Token=char>,
+        Input::Error: ParseError<Input::Token, Input::Range, Input::Position> {
+    let h_00_09 = char('0').with(digit('0', '9'))
+        .or(digit('0', '9')).map(|e| ValueExpr(e as u32 - 48));
+    let h_10_19 = char('1').and(digit('0', '9')).map(|(e1, e2)| {
+        let n = (e1 as u32 - 48) * 10 + (e2 as u32 - 48);
+        ValueExpr(n)
+    });
+    let h_20_23 = char('2').and(digit('0', '3')).map(|(e1, e2)| {
+        let n = (e1 as u32 - 48) * 10 + (e2 as u32 - 48);
+        ValueExpr(n)
+    });
+    h_20_23.or(h_10_19).or(h_00_09)
+}
+
+pub fn day_digit<'a, Input>() -> impl Parser<Input, Output=Expr>
+    where
+        Input: Stream<Token=char>,
+        Input::Error: ParseError<Input::Token, Input::Range, Input::Position> {
+    let d_01_09 = char('0').with(digit('1', '9'))
+        .or(digit('1', '9')).map(|e| ValueExpr(e as u32 - 48));
+    let d_10_29 = digit('1', '2').and(digit('0', '9')).map(|(e1, e2)| {
+        let n = (e1 as u32 - 48) * 10 + (e2 as u32 - 48);
+        ValueExpr(n)
+    });
+    let d_30_31 = char('3').and(digit('0', '1')).map(|(e1, e2)| {
+        let n = (e1 as u32 - 48) * 10 + (e2 as u32 - 48);
+        ValueExpr(n)
+    });
+    d_30_31.or(d_10_29).or(d_01_09)
 }
 
 pub fn digit<'a, Input>(min: char, max: char) -> impl Parser<Input, Output=char>
@@ -117,6 +151,24 @@ mod tests {
     use combine::*;
 
     use super::*;
+
+    #[test]
+    fn test_day_digit() {
+        for n in 1..32 {
+            let s: &str = &format!("{:<02}", n);
+            let result: Expr = day_digit().parse(s).unwrap().0;
+            assert_eq!(result, ValueExpr(n));
+        }
+    }
+
+    #[test]
+    fn test_hour_digit() {
+        for n in 0..23 {
+            let s: &str = &format!("{:<02}", n);
+            let result: Expr = hour_digit().parse(s).unwrap().0;
+            assert_eq!(result, ValueExpr(n));
+        }
+    }
 
     #[test]
     fn test_min_digit() {
