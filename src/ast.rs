@@ -11,7 +11,7 @@ pub trait ExprAcceptor {
   }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Expr {
   NoOp,
   ValueExpr(u8),
