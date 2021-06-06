@@ -7,7 +7,6 @@ mod cron_parser;
 pub use ast::*;
 pub use cron_parser::*;
 
-#[macro_use]
 extern crate pom;
 
 #[cfg(test)]
