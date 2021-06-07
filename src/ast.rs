@@ -1,16 +1,3 @@
-pub trait ExprVisitor<T> {
-  fn visit(&self, e: &impl ExprAcceptor) -> T;
-}
-
-pub trait ExprAcceptor {
-  fn accept<T>(&self, visitor: impl ExprVisitor<T>) -> T
-  where
-    Self: Sized,
-  {
-    visitor.visit(self)
-  }
-}
-
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expr {
   NoOp,
@@ -35,5 +22,3 @@ pub enum Expr {
     day_of_weeks: Box<Expr>,
   },
 }
-
-impl ExprAcceptor for Expr {}
