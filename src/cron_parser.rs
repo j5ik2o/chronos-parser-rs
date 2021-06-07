@@ -68,15 +68,14 @@ fn range_per(p: Parser<u8, Expr>) -> Parser<u8, Expr> {
   })
 }
 
-fn range<'a, PF>(p: PF) -> Parser<'a, u8, Expr>
-where
-  PF: Fn() -> Parser<'a, u8, Expr>,
-{
-  (p() - sym(b'-') + p() + range_per(p())).map(|((e1, e2), e3)| RangeExpr {
-    from: Box::from(e1),
-    to: Box::from(e2),
-    per_option: Box::from(e3),
-  })
+macro_rules! range {
+  ( $x:expr ) => {
+    ($x - sym(b'-') + $x + range_per($x)).map(|((e1, e2), e3)| RangeExpr {
+      from: Box::from(e1),
+      to: Box::from(e2),
+      per_option: Box::from(e3),
+    })
+  };
 }
 
 fn list(p: Parser<u8, Expr>) -> Parser<u8, Expr> {
@@ -86,20 +85,19 @@ fn list(p: Parser<u8, Expr>) -> Parser<u8, Expr> {
   })
 }
 
-fn digit_instruction<'a, PF>(p: PF) -> Parser<'a, u8, Expr>
-where
-  PF: Fn() -> Parser<'a, u8, Expr>,
-{
-  asterisk_per(p()) | asterisk() | list(range(|| p()) | p())
+macro_rules! digit_instruction {
+  ( $x:expr ) => {
+    asterisk_per($x) | asterisk() | list(range!($x) | $x)
+  };
 }
 
 fn instruction<'a>() -> Parser<'a, u8, Expr> {
-  (digit_instruction(|| min_digit()) - sym(b' ') + digit_instruction(|| hour_digit()) - sym(b' ')
-    + digit_instruction(|| day_digit())
+  (digit_instruction!(min_digit()) - sym(b' ') + digit_instruction!(hour_digit()) - sym(b' ')
+    + digit_instruction!(day_digit())
     - sym(b' ')
-    + digit_instruction(|| month_digit())
+    + digit_instruction!(month_digit())
     - sym(b' ')
-    + digit_instruction(|| day_of_week_text() | day_of_week_digit()))
+    + digit_instruction!(day_of_week_text() | day_of_week_digit()))
   .map(|((((mins, hours), days), months), day_of_weeks)| CronExpr {
     mins: Box::from(mins),
     hours: Box::from(hours),
@@ -141,11 +139,11 @@ mod tests {
 
   #[test]
   fn test_digit_instruction() {
-    let result = (digit_instruction(|| min_digit()) - end())
+    let result = (digit_instruction!(min_digit()) - end())
       .parse(b"*")
       .unwrap();
     assert_eq!(result, AnyValueExpr);
-    let result = (digit_instruction(|| min_digit()) - end())
+    let result = (digit_instruction!(min_digit()) - end())
       .parse(b"*/2")
       .unwrap();
     assert_eq!(
@@ -155,7 +153,7 @@ mod tests {
         option: Box::from(ValueExpr(2))
       }
     );
-    let result = (digit_instruction(|| min_digit()) - end())
+    let result = (digit_instruction!(min_digit()) - end())
       .parse(b"1-10/2")
       .unwrap();
     assert_eq!(
@@ -166,14 +164,14 @@ mod tests {
         per_option: Box::from(ValueExpr(2))
       }
     );
-    let result = (digit_instruction(|| min_digit()) - end())
+    let result = (digit_instruction!(min_digit()) - end())
       .parse(b"1,2,3")
       .unwrap();
     assert_eq!(
       result,
       ListExpr(vec![ValueExpr(1), ValueExpr(2), ValueExpr(3)])
     );
-    let result = (digit_instruction(|| min_digit()) - end())
+    let result = (digit_instruction!(min_digit()) - end())
       .parse(b"1")
       .unwrap();
     assert_eq!(result, ValueExpr(1));
@@ -191,13 +189,13 @@ mod tests {
   }
 
   #[test]
-  fn test_range_per() {
+  fn test_range() {
     for n2 in 1..=59 {
       let option = n2 / 2;
       let n1 = n2 - 1;
       let s: &str = &format!("{:<02}-{:<02}/{:<02}", n1, n2, option);
       println!("{}", s);
-      let result = (range(|| min_digit()) - end()).parse(s.as_bytes()).unwrap();
+      let result = (range!(min_digit()) - end()).parse(s.as_bytes()).unwrap();
       assert_eq!(
         result,
         RangeExpr {
