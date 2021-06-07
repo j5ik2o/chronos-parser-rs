@@ -1,4 +1,3 @@
-
 pub trait ExprVisitor<T> {
   fn visit(&self, e: &impl ExprAcceptor) -> T;
 }
@@ -27,9 +26,7 @@ pub enum Expr {
     to: Box<Expr>,
     per_option: Box<Expr>,
   },
-  ListExpr (
-    Vec<Expr>,
-  ),
+  ListExpr(Vec<Expr>),
   CronExpr {
     mins: Box<Expr>,
     hours: Box<Expr>,
@@ -38,6 +35,5 @@ pub enum Expr {
     day_of_weeks: Box<Expr>,
   },
 }
-
 
 impl ExprAcceptor for Expr {}
