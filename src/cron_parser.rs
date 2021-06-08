@@ -107,6 +107,10 @@ fn instruction<'a>() -> Parser<'a, u8, Expr> {
   })
 }
 
+pub fn parser_expr(source: &str) -> pom::Result<Expr> {
+  (instruction() - end()).parse(source.as_bytes())
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;
