@@ -2,7 +2,7 @@ use pom::parser::*;
 
 use crate::Expr;
 use crate::Expr::{
-  AnyValueExpr, ListExpr, NoOp, PerExpr, RangeExpr, ValueExpr, LastValueExpr, CronExpr,
+  AnyValueExpr, CronExpr, LastValueExpr, ListExpr, NoOp, PerExpr, RangeExpr, ValueExpr,
 };
 
 fn min_digit<'a>() -> Parser<'a, u8, Expr> {

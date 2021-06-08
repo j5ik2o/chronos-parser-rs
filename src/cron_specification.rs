@@ -1,17 +1,24 @@
-use std::marker::PhantomData;
-
 use chrono::{DateTime, TimeZone};
 
 use crate::{CronEvaluator, Expr};
 
-pub struct CronSpecification<Tz: TimeZone>(PhantomData<Tz>);
+pub trait Specification<T> {
+  fn is_satisfied_by(&self, arg: T) -> bool;
+}
 
-impl<Tz: TimeZone> CronSpecification<Tz> {
-    pub fn never() -> impl Fn(DateTime<Tz>) -> bool {
-        |_| false
-    }
+#[derive(Clone)]
+pub struct CronSpecification {
+  expr: Expr,
+}
 
-    pub fn of(expr: Expr) -> impl Fn(DateTime<Tz>) -> bool {
-        move |instant| CronEvaluator::new(instant).eval(&expr)
-    }
+impl CronSpecification {
+  pub fn new(expr: Expr) -> Self {
+    Self { expr }
+  }
+}
+
+impl<Tz: TimeZone> Specification<DateTime<Tz>> for CronSpecification {
+  fn is_satisfied_by(&self, datetime: DateTime<Tz>) -> bool {
+    CronEvaluator::new(datetime).eval(&self.expr)
+  }
 }
