@@ -119,7 +119,7 @@ mod tests {
   use crate::{CronInterval, CronSpecification, CronParser};
 
   #[test]
-  fn test() {
+  fn test_iterator() {
     let dt = Utc.ymd(2021, 1, 1).and_hms(1, 1, 0);
 
     let expr = CronParser::parse("0-59/30 0-23/2 * * *").unwrap();
