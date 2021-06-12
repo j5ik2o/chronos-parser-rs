@@ -84,8 +84,8 @@ impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> Iterator
           .cron_specification
           .is_satisfied_by(&self.curr)
         {
-          let s = self.curr.clone();
-          Some(s)
+          let d = self.curr.clone();
+          Some(d)
         } else {
           self.next()
         }
@@ -98,8 +98,8 @@ impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> Iterator
               .cron_interval
               .cron_specification
               .is_satisfied_by(&self.curr) {
-            let s = self.curr.clone();
-            Some(s)
+            let d = self.curr.clone();
+            Some(d)
           } else {
             self.next()
           }
