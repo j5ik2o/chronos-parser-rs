@@ -1,32 +1,28 @@
 use chrono::{DateTime, TimeZone};
 use intervals_rs::LimitValue;
 
-use crate::{CronInterval, Expr, CronSpecification, CronParser};
-use std::marker::PhantomData;
+use crate::{CronInterval, CronParser, CronSpecification, Expr};
 
 pub struct CronSchedule<Tz>
 where
   Tz: TimeZone,
 {
   expr: Expr,
-  phantom: PhantomData<Tz>,
+  timezone: Tz,
 }
 
 impl<Tz: TimeZone> CronSchedule<Tz> {
-  pub fn new(source: &str) -> Self {
+  pub fn new(source: &str, timezone: Tz) -> Self {
     let expr = CronParser::parse(source).unwrap();
-    Self {
-      expr,
-      phantom: PhantomData,
-    }
+    Self { expr, timezone }
   }
 
   pub fn cron_interval(&self, start: DateTime<Tz>) -> CronInterval<Tz, CronSpecification> {
-    let spec = CronSpecification::new(self.expr.clone());
-    CronInterval::new(LimitValue::Limit(start), LimitValue::Limitless, spec)
+    CronInterval::new(
+      LimitValue::Limit(start.clone()),
+      LimitValue::Limitless,
+      CronSpecification::new(&self.expr),
+      self.timezone.clone(),
+    )
   }
-
-  // pub fn upcoming(&self, start: DateTime<Tz>) -> CronIntervalIterator<'_, Tz, CronSpecification> {
-  //   self.cron_interval(start).iter(start.timezone())
-  // }
 }

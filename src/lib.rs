@@ -4,6 +4,7 @@
 #![feature(impl_trait_in_bindings)]
 #![feature(box_patterns)]
 #![feature(once_cell)]
+#![feature(generators, generator_trait)]
 extern crate pom;
 
 pub use ast::*;
@@ -22,5 +23,7 @@ mod cron_specification;
 
 #[cfg(test)]
 mod tests {
+
+  #[test]
   fn test() {}
 }

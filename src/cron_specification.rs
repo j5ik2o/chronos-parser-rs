@@ -7,18 +7,18 @@ pub trait Specification<T> {
 }
 
 #[derive(Clone)]
-pub struct CronSpecification {
-  expr: Expr,
+pub struct CronSpecification<'a> {
+  expr: &'a Expr,
 }
 
-impl CronSpecification {
-  pub fn new(expr: Expr) -> Self {
+impl<'a> CronSpecification<'a> {
+  pub fn new(expr: &'a Expr) -> Self {
     Self { expr }
   }
 }
 
-impl<Tz: TimeZone> Specification<DateTime<Tz>> for CronSpecification {
+impl<'a, Tz: TimeZone> Specification<DateTime<Tz>> for CronSpecification<'a> {
   fn is_satisfied_by(&self, datetime: &DateTime<Tz>) -> bool {
-    CronEvaluator::new(datetime).eval(&self.expr)
+    CronEvaluator::new(datetime).eval(self.expr)
   }
 }

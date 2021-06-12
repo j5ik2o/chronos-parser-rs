@@ -1,5 +1,3 @@
-use std::marker::PhantomData;
-
 use chrono::{DateTime, Duration, TimeZone};
 use intervals_rs::{Interval, LimitValue};
 
@@ -9,7 +7,7 @@ use crate::Specification;
 pub struct CronInterval<Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> {
   underlying: Interval<i64>,
   cron_specification: S,
-  phantom: PhantomData<Tz>,
+  timezone: Tz,
 }
 
 impl<Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronInterval<Tz, S> {
@@ -17,6 +15,7 @@ impl<Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronInterval<Tz, S> {
     start_value: LimitValue<DateTime<Tz>>,
     end_value: LimitValue<DateTime<Tz>>,
     cron_specification: S,
+    timezone: Tz,
   ) -> Self {
     let start = match start_value {
       LimitValue::Limitless => LimitValue::Limitless,
@@ -29,7 +28,7 @@ impl<Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronInterval<Tz, S> {
     Self {
       underlying: Interval::closed(start, end),
       cron_specification,
-      phantom: PhantomData,
+      timezone,
     }
   }
   pub fn iter(&self, timezone: Tz) -> CronIntervalIterator<Tz, S> {
@@ -85,10 +84,13 @@ impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> Iterator
 impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronIntervalIterator<'a, Tz, S> {
   fn end_value(&self) -> Option<DateTime<Tz>> {
     let end_value = if self.cron_interval.underlying.has_upper_limit() {
-      let result = match self.cron_interval.underlying.as_upper_limit().as_value() {
-        Ok(&v) => self.timezone.timestamp_millis(v),
-        Err(..) => panic!(),
-      };
+      let result = self
+        .cron_interval
+        .underlying
+        .as_upper_limit()
+        .as_value()
+        .map(|v| self.timezone.timestamp_millis(*v))
+        .unwrap_or_else(|_| panic!());
       Some(result)
     } else {
       None
@@ -116,13 +118,14 @@ mod tests {
 
   #[test]
   fn test_iterator() {
-    let dt = Utc.ymd(2021, 1, 1).and_hms(1, 1, 0);
+    let datetime = Utc.ymd(2021, 1, 1).and_hms(1, 1, 0);
 
     let expr = CronParser::parse("0-59/30 0-23/2 * * *").unwrap();
     let interval = CronInterval::new(
-      LimitValue::Limit(dt),
+      LimitValue::Limit(datetime),
       LimitValue::Limitless,
-      CronSpecification::new(expr),
+      CronSpecification::new(&expr),
+      datetime.timezone(),
     );
     let itr = interval.iter(Utc);
     itr.take(5).for_each(|e| println!("{:?}", e));
