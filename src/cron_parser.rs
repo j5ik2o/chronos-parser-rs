@@ -110,13 +110,10 @@ fn instruction<'a>() -> Parser<'a, u8, Expr> {
 pub struct CronParser;
 
 impl CronParser {
-
   pub fn parse(source: &str) -> pom::Result<Expr> {
     (instruction() - end()).parse(source.as_bytes())
   }
-
 }
-
 
 #[cfg(test)]
 mod tests {

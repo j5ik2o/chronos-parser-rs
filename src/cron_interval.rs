@@ -3,7 +3,7 @@ use std::marker::PhantomData;
 use chrono::{DateTime, Duration, TimeZone};
 use intervals_rs::{Interval, LimitValue};
 
-use crate::{Specification};
+use crate::Specification;
 
 #[derive(Clone)]
 pub struct CronInterval<Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> {
@@ -46,21 +46,6 @@ impl<Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronInterval<Tz, S> {
   }
 }
 
-impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronIntervalIterator<'a, Tz, S> {
-  fn end_value(&self) -> Option<DateTime<Tz>> {
-    let end_value = if self.cron_interval.underlying.has_upper_limit() {
-      let result = match self.cron_interval.underlying.as_upper_limit().as_value() {
-        Ok(&v) => self.timezone.timestamp_millis(v),
-        Err(..) => panic!(),
-      };
-      Some(result)
-    } else {
-      None
-    };
-    end_value
-  }
-}
-
 #[derive(Clone)]
 pub struct CronIntervalIterator<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> {
   timezone: Tz,
@@ -79,34 +64,44 @@ impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> Iterator
     self.next = self.next.clone() + Duration::minutes(1);
     match self.end_value() {
       None => {
-        if self
-          .cron_interval
-          .cron_specification
-          .is_satisfied_by(&self.curr)
-        {
-          let d = self.curr.clone();
-          Some(d)
-        } else {
-          self.next()
-        }
+        self.proceed_next();
+        let curr: DateTime<Tz> = self.curr.clone();
+        Some(curr)
       }
       Some(end) => {
-        if end >= self.curr
-        {
-          if
-          self
-              .cron_interval
-              .cron_specification
-              .is_satisfied_by(&self.curr) {
-            let d = self.curr.clone();
-            Some(d)
-          } else {
-            self.next()
-          }
+        if end >= self.curr {
+          self.proceed_next();
+          let curr: DateTime<Tz> = self.curr.clone();
+          Some(curr)
         } else {
           None
         }
       }
+    }
+  }
+}
+
+impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronIntervalIterator<'a, Tz, S> {
+  fn end_value(&self) -> Option<DateTime<Tz>> {
+    let end_value = if self.cron_interval.underlying.has_upper_limit() {
+      let result = match self.cron_interval.underlying.as_upper_limit().as_value() {
+        Ok(&v) => self.timezone.timestamp_millis(v),
+        Err(..) => panic!(),
+      };
+      Some(result)
+    } else {
+      None
+    };
+    end_value
+  }
+  fn proceed_next(&mut self) {
+    while !self
+        .cron_interval
+        .cron_specification
+        .is_satisfied_by(&self.curr)
+    {
+      self.curr = self.next.clone();
+      self.next = self.next.clone() + Duration::minutes(1);
     }
   }
 }
@@ -116,7 +111,7 @@ mod tests {
   use chrono::{TimeZone, Utc};
   use intervals_rs::LimitValue;
 
-  use crate::{CronInterval, CronSpecification, CronParser};
+  use crate::{CronInterval, CronParser, CronSpecification};
 
   #[test]
   fn test_iterator() {
