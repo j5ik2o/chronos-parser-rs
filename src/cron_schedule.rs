@@ -1,7 +1,7 @@
 use chrono::{DateTime, TimeZone};
 use intervals_rs::LimitValue;
 
-use crate::{CronInterval, Expr, parser_expr, Specification, CronSpecification, CronIntervalIterator};
+use crate::{CronInterval, Expr, CronSpecification, CronParser};
 use std::marker::PhantomData;
 
 pub struct CronSchedule<Tz>
@@ -14,7 +14,7 @@ where
 
 impl<Tz: TimeZone> CronSchedule<Tz> {
   pub fn new(source: &str) -> Self {
-    let expr = parser_expr(source).unwrap();
+    let expr = CronParser::parse(source).unwrap();
     Self {
       expr,
       phantom: PhantomData,

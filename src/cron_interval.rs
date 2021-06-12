@@ -39,17 +39,11 @@ impl<Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronInterval<Tz, S> {
     };
     CronIntervalIterator {
       timezone,
-      next: dt,
+      next: dt.clone(),
+      curr: dt,
       cron_interval: self,
     }
   }
-}
-
-#[derive(Clone)]
-pub struct CronIntervalIterator<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> {
-  timezone: Tz,
-  next: DateTime<Tz>,
-  cron_interval: &'a CronInterval<Tz, S>,
 }
 
 impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronIntervalIterator<'a, Tz, S> {
@@ -67,35 +61,45 @@ impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronIntervalItera
   }
 }
 
+#[derive(Clone)]
+pub struct CronIntervalIterator<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> {
+  timezone: Tz,
+  curr: DateTime<Tz>,
+  next: DateTime<Tz>,
+  cron_interval: &'a CronInterval<Tz, S>,
+}
+
 impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> Iterator
   for CronIntervalIterator<'a, Tz, S>
 {
   type Item = DateTime<Tz>;
 
   fn next(&mut self) -> Option<Self::Item> {
-    let current = self.next.clone();
+    self.curr = self.next.clone();
     self.next = self.next.clone() + Duration::minutes(1);
     match self.end_value() {
       None => {
         if self
           .cron_interval
           .cron_specification
-          .is_satisfied_by(current.clone())
+          .is_satisfied_by(&self.curr)
         {
-          Some(current)
+          let s = self.curr.clone();
+          Some(s)
         } else {
           self.next()
         }
       }
       Some(end) => {
-        if end >= current
+        if end >= self.curr
         {
           if
           self
               .cron_interval
               .cron_specification
-              .is_satisfied_by(current.clone()) {
-            Some(current)
+              .is_satisfied_by(&self.curr) {
+            let s = self.curr.clone();
+            Some(s)
           } else {
             self.next()
           }
@@ -112,26 +116,17 @@ mod tests {
   use chrono::{TimeZone, Utc};
   use intervals_rs::LimitValue;
 
-  use crate::{CronInterval, CronSpecification, Expr};
+  use crate::{CronInterval, CronSpecification, CronParser};
 
   #[test]
   fn test() {
     let dt = Utc.ymd(2021, 1, 1).and_hms(1, 1, 0);
 
+    let expr = CronParser::parse("0-59/30 0-23/2 * * *").unwrap();
     let interval = CronInterval::new(
       LimitValue::Limit(dt),
       LimitValue::Limitless,
-      CronSpecification::new(Expr::CronExpr {
-        mins: Box::from(Expr::RangeExpr {
-          from: Box::from(Expr::ValueExpr(1)),
-          to: Box::from(Expr::ValueExpr(5)),
-          per_option: Box::from(Expr::NoOp),
-        }),
-        hours: Box::from(Expr::AnyValueExpr),
-        days: Box::from(Expr::AnyValueExpr),
-        months: Box::from(Expr::AnyValueExpr),
-        day_of_weeks: Box::from(Expr::AnyValueExpr),
-      }),
+      CronSpecification::new(expr),
     );
     let itr = interval.iter(Utc);
     itr.take(5).for_each(|e| println!("{:?}", e));
