@@ -3,7 +3,7 @@ use chrono::{DateTime, TimeZone};
 use crate::{CronEvaluator, Expr};
 
 pub trait Specification<T> {
-  fn is_satisfied_by(&self, arg: T) -> bool;
+  fn is_satisfied_by(&self, arg: &T) -> bool;
 }
 
 #[derive(Clone)]
@@ -18,7 +18,7 @@ impl CronSpecification {
 }
 
 impl<Tz: TimeZone> Specification<DateTime<Tz>> for CronSpecification {
-  fn is_satisfied_by(&self, datetime: DateTime<Tz>) -> bool {
+  fn is_satisfied_by(&self, datetime: &DateTime<Tz>) -> bool {
     CronEvaluator::new(datetime).eval(&self.expr)
   }
 }

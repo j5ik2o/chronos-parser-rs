@@ -2,8 +2,8 @@ use chrono::{Datelike, DateTime, NaiveDate, Timelike, TimeZone};
 
 use crate::Expr;
 
-pub struct CronEvaluator<Tz: TimeZone> {
-  instant: DateTime<Tz>,
+pub struct CronEvaluator<'a, Tz: TimeZone> {
+  instant: &'a DateTime<Tz>,
 }
 
 pub struct Environment {
@@ -33,8 +33,8 @@ fn get_days_from_month(year: i32, month: u32) -> i64 {
   .num_days()
 }
 
-impl<Tz: TimeZone> CronEvaluator<Tz> {
-  pub fn new(instant: DateTime<Tz>) -> Self {
+impl<'a, Tz: TimeZone> CronEvaluator<'a, Tz> {
+  pub fn new(instant: &'a DateTime<Tz>) -> Self {
     Self { instant }
   }
 
@@ -118,7 +118,7 @@ mod tests {
   #[test]
   fn test_anytime() {
     let date_time = Utc.ymd(2021, 1, 1).and_hms(1, 1, 1);
-    let cron_evaluator = CronEvaluator::new(date_time);
+    let cron_evaluator = CronEvaluator::new(&date_time);
     let expr = Expr::CronExpr {
       mins: Box::from(Expr::AnyValueExpr),
       hours: Box::from(Expr::AnyValueExpr),
@@ -133,7 +133,7 @@ mod tests {
   #[test]
   fn test_point_time() {
     let date_time = Utc.ymd(2021, 1, 1).and_hms(1, 1, 1);
-    let cron_evaluator = CronEvaluator::new(date_time);
+    let cron_evaluator = CronEvaluator::new(&date_time);
     let expr = Expr::CronExpr {
       mins: Box::from(Expr::ValueExpr(1)),
       hours: Box::from(Expr::ValueExpr(1)),
