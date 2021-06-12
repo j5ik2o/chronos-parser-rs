@@ -84,17 +84,21 @@ impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> Iterator
         {
           Some(current)
         } else {
-          None
+          self.next()
         }
       }
       Some(end) => {
         if end >= current
-          && self
-            .cron_interval
-            .cron_specification
-            .is_satisfied_by(current.clone())
         {
-          Some(current)
+          if
+          self
+              .cron_interval
+              .cron_specification
+              .is_satisfied_by(current.clone()) {
+            Some(current)
+          } else {
+            self.next()
+          }
         } else {
           None
         }
