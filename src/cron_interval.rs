@@ -33,14 +33,15 @@ impl<Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronInterval<Tz, S> {
     }
   }
   pub fn iter(&self, timezone: Tz) -> CronIntervalIterator<Tz, S> {
-    let dt: DateTime<Tz> = match self.underlying.as_lower_limit().as_value() {
-      Ok(&v) => timezone.timestamp_millis(v),
-      Err(..) => panic!(),
-    };
+    let dt = self
+      .underlying
+      .as_lower_limit()
+      .as_value()
+      .unwrap_or_else(|_| panic!());
     CronIntervalIterator {
       timezone,
-      next: dt.clone(),
-      curr: dt,
+      next: *dt,
+      curr: *dt,
       cron_interval: self,
     }
   }
@@ -49,8 +50,8 @@ impl<Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronInterval<Tz, S> {
 #[derive(Clone)]
 pub struct CronIntervalIterator<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> {
   timezone: Tz,
-  curr: DateTime<Tz>,
-  next: DateTime<Tz>,
+  curr: i64,
+  next: i64,
   cron_interval: &'a CronInterval<Tz, S>,
 }
 
@@ -60,18 +61,18 @@ impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> Iterator
   type Item = DateTime<Tz>;
 
   fn next(&mut self) -> Option<Self::Item> {
-    self.curr = self.next.clone();
-    self.next = self.next.clone() + Duration::minutes(1);
+    self.curr = self.next;
+    self.next = self.next + Duration::minutes(1).num_milliseconds();
     match self.end_value() {
       None => {
         self.proceed_next();
-        let curr: DateTime<Tz> = self.curr.clone();
+        let curr = self.timezone.timestamp_millis(self.curr);
         Some(curr)
       }
       Some(end) => {
-        if end >= self.curr {
+        if end.timestamp_millis() >= self.curr {
           self.proceed_next();
-          let curr: DateTime<Tz> = self.curr.clone();
+          let curr = self.timezone.timestamp_millis(self.curr);
           Some(curr)
         } else {
           None
@@ -96,12 +97,12 @@ impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronIntervalItera
   }
   fn proceed_next(&mut self) {
     while !self
-        .cron_interval
-        .cron_specification
-        .is_satisfied_by(&self.curr)
+      .cron_interval
+      .cron_specification
+      .is_satisfied_by(&self.timezone.timestamp_millis(self.curr))
     {
-      self.curr = self.next.clone();
-      self.next = self.next.clone() + Duration::minutes(1);
+      self.curr = self.next;
+      self.next = self.next + Duration::minutes(1).num_milliseconds();
     }
   }
 }
@@ -126,11 +127,10 @@ mod tests {
     let itr = interval.iter(Utc);
     itr.take(5).for_each(|e| println!("{:?}", e));
 
-
-// 2021-01-01T02:00:00Z
-// 2021-01-01T02:30:00Z
-// 2021-01-01T04:00:00Z
-// 2021-01-01T04:30:00Z
-// 2021-01-01T06:00:00Z
+    // 2021-01-01T02:00:00Z
+    // 2021-01-01T02:30:00Z
+    // 2021-01-01T04:00:00Z
+    // 2021-01-01T04:30:00Z
+    // 2021-01-01T06:00:00Z
   }
 }
