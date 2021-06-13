@@ -4,21 +4,21 @@ use intervals_rs::{Interval, LimitValue};
 use crate::Specification;
 
 #[derive(Clone)]
-pub struct CronInterval<Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> {
+pub struct CronInterval<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> {
   underlying: Interval<i64>,
   cron_specification: S,
-  timezone: Tz,
+  timezone: &'a Tz,
 }
 
-impl<Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronInterval<Tz, S> {
+impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronInterval<'a, Tz, S> {
   pub fn new(
     start_value: LimitValue<DateTime<Tz>>,
     end_value: LimitValue<DateTime<Tz>>,
     cron_specification: S,
-    timezone: Tz,
+    timezone: &'a Tz,
   ) -> Self {
     let start = match start_value {
-      LimitValue::Limitless => LimitValue::Limitless,
+      LimitValue::Limitless => panic!(),
       LimitValue::Limit(v) => LimitValue::Limit(v.timestamp_millis()),
     };
     let end = match end_value {
@@ -51,7 +51,7 @@ pub struct CronIntervalIterator<'a, Tz: TimeZone, S: Specification<DateTime<Tz>>
   timezone: Tz,
   curr: i64,
   next: i64,
-  cron_interval: &'a CronInterval<Tz, S>,
+  cron_interval: &'a CronInterval<'a, Tz, S>,
 }
 
 impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> Iterator
@@ -119,13 +119,14 @@ mod tests {
   #[test]
   fn test_iterator() {
     let datetime = Utc.ymd(2021, 1, 1).and_hms(1, 1, 0);
+    let timezone = datetime.timezone();
 
     let expr = CronParser::parse("0-59/30 0-23/2 * * *").unwrap();
     let interval = CronInterval::new(
       LimitValue::Limit(datetime),
       LimitValue::Limitless,
       CronSpecification::new(&expr),
-      datetime.timezone(),
+      &timezone,
     );
     let itr = interval.iter(Utc);
     itr.take(5).for_each(|e| println!("{:?}", e));
