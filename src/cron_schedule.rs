@@ -30,3 +30,21 @@ impl<Tz: TimeZone> CronSchedule<Tz> {
     self.cron_interval(start.clone()).iter(start.timezone())
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use chrono::{TimeZone, Utc};
+  use intervals_rs::LimitValue;
+
+  use crate::{CronInterval, CronParser, CronSchedule, CronSpecification};
+
+  #[test]
+  fn test_iterator() {
+    let dt = Utc.ymd(2021, 1, 1).and_hms(1, 1, 0);
+
+    let cs = CronSchedule::new("0-59/30 0-23/2 * * *");
+    let itr = cs.upcoming(dt);
+
+    itr.take(5).for_each(|e| println!("{:?}", e));
+  }
+}
