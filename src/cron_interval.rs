@@ -1,4 +1,5 @@
 use std::marker::PhantomData;
+use std::rc::Rc;
 
 use chrono::{DateTime, Duration, TimeZone};
 use intervals_rs::{Interval, LimitValue};
@@ -13,6 +14,7 @@ pub struct CronInterval<Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> {
 }
 
 impl<Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronInterval<Tz, S> {
+
   pub fn new(
     start_value: LimitValue<DateTime<Tz>>,
     end_value: LimitValue<DateTime<Tz>>,
@@ -32,6 +34,7 @@ impl<Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronInterval<Tz, S> {
       phantom: PhantomData,
     }
   }
+
   pub fn iter(&self, timezone: Tz) -> CronIntervalIterator<Tz, S> {
     let dt: DateTime<Tz> = match self.underlying.as_lower_limit().as_value() {
       Ok(&v) => timezone.timestamp_millis(v),
@@ -41,21 +44,22 @@ impl<Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronInterval<Tz, S> {
       timezone,
       next: dt.clone(),
       curr: dt,
-      cron_interval: self,
+      cron_interval: Rc::new(self.clone()),
     }
   }
+
 }
 
 #[derive(Clone)]
-pub struct CronIntervalIterator<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> {
+pub struct CronIntervalIterator<Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> {
   timezone: Tz,
   curr: DateTime<Tz>,
   next: DateTime<Tz>,
-  cron_interval: &'a CronInterval<Tz, S>,
+  cron_interval: Rc<CronInterval<Tz, S>>,
 }
 
 impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> Iterator
-  for CronIntervalIterator<'a, Tz, S>
+  for CronIntervalIterator<Tz, S>
 {
   type Item = DateTime<Tz>;
 
@@ -81,7 +85,16 @@ impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> Iterator
   }
 }
 
-impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronIntervalIterator<'a, Tz, S> {
+impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronIntervalIterator<Tz, S> {
+
+  pub fn timezone(&self) -> &Tz {
+    &self.timezone
+  }
+
+  pub fn cron_interval(&self) -> Rc<CronInterval<Tz, S>> {
+    self.cron_interval.clone()
+  }
+
   fn end_value(&self) -> Option<DateTime<Tz>> {
     let end_value = if self.cron_interval.underlying.has_upper_limit() {
       let result = match self.cron_interval.underlying.as_upper_limit().as_value() {
@@ -94,6 +107,7 @@ impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronIntervalItera
     };
     end_value
   }
+
   fn proceed_next(&mut self) {
     while !self
         .cron_interval
@@ -104,6 +118,7 @@ impl<'a, Tz: TimeZone, S: Specification<DateTime<Tz>> + Clone> CronIntervalItera
       self.next = self.next.clone() + Duration::minutes(1);
     }
   }
+
 }
 
 #[cfg(test)]

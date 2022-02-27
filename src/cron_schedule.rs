@@ -1,7 +1,7 @@
 use chrono::{DateTime, TimeZone};
 use intervals_rs::LimitValue;
 
-use crate::{CronInterval, Expr, CronSpecification, CronParser};
+use crate::{CronInterval, Expr, CronSpecification, CronParser, CronIntervalIterator};
 use std::marker::PhantomData;
 
 pub struct CronSchedule<Tz>
@@ -26,7 +26,7 @@ impl<Tz: TimeZone> CronSchedule<Tz> {
     CronInterval::new(LimitValue::Limit(start), LimitValue::Limitless, spec)
   }
 
-  // pub fn upcoming(&self, start: DateTime<Tz>) -> CronIntervalIterator<'_, Tz, CronSpecification> {
-  //   self.cron_interval(start).iter(start.timezone())
-  // }
+  pub fn upcoming(&self, start: DateTime<Tz>) -> CronIntervalIterator<Tz, CronSpecification> {
+    self.cron_interval(start.clone()).iter(start.timezone())
+  }
 }
