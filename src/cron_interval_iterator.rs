@@ -2,6 +2,8 @@ use std::rc::Rc;
 use chrono::{DateTime, Duration, TimeZone};
 use crate::{CronInterval, Specification};
 
+/// Iterator for The CronInterval.<br/>
+/// CronIntervalのためのイテレータ。
 #[derive(Clone)]
 pub struct CronIntervalIterator<Tz: TimeZone, S: Specification<DateTime<Tz>>> {
     timezone: Tz,
@@ -11,6 +13,8 @@ pub struct CronIntervalIterator<Tz: TimeZone, S: Specification<DateTime<Tz>>> {
 }
 
 impl<Tz: TimeZone, S: Specification<DateTime<Tz>>> CronIntervalIterator<Tz, S> {
+    /// The factory method.
+    /// ファクトリメソッド。
     pub fn new(timezone: Tz,
                curr: DateTime<Tz>,
                next: DateTime<Tz>,

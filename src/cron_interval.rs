@@ -16,7 +16,7 @@ pub struct CronInterval<Tz: TimeZone, S: Specification<DateTime<Tz>>> {
 }
 
 impl<Tz: TimeZone, S: Specification<DateTime<Tz>>> CronInterval<Tz, S> {
-  fn to_long_limit_value(value: LimitValue<DateTime<Tz>>) -> LimitValue<i64> {
+  fn convert_to_long_limit_value(value: LimitValue<DateTime<Tz>>) -> LimitValue<i64> {
     match value {
       LimitValue::Limitless => LimitValue::Limitless,
       LimitValue::Limit(v) => LimitValue::Limit(v.timestamp_millis()),
@@ -32,8 +32,8 @@ impl<Tz: TimeZone, S: Specification<DateTime<Tz>>> CronInterval<Tz, S> {
     end_value: LimitValue<DateTime<Tz>>,
     cron_specification: S,
   ) -> Self {
-    let start = Self::to_long_limit_value(start_value);
-    let end = Self::to_long_limit_value(end_value);
+    let start = Self::convert_to_long_limit_value(start_value);
+    let end = Self::convert_to_long_limit_value(end_value);
     Self {
       underlying: Interval::closed(start, end),
       cron_specification,
