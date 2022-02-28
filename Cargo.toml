@@ -1,13 +1,16 @@
+cargo-features = ["edition2021"]
+
 [package]
 name = "chronos-parser-rs"
 version = "0.1.0"
 authors = ["Junichi Kato <j5ik2o@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-intervals-rs = "0.0.4"
+anyhow = "1.0.55"
+intervals-rs = "0.0.5"
 pom = "3.2.0"
 chrono = "0.4.19"
 rust-fp-categories = "0.0.4"

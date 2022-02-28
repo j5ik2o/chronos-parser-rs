@@ -1,7 +1,5 @@
-// #![feature(generic_associated_types)]
 #![allow(incomplete_features)]
 #![allow(dead_code)]
-#![feature(impl_trait_in_bindings)]
 #![feature(box_patterns)]
 #![feature(once_cell)]
 extern crate pom;
@@ -9,6 +7,7 @@ extern crate pom;
 pub use ast::*;
 pub use cron_evaluator::*;
 pub use cron_interval::*;
+pub use cron_interval_iterator::*;
 pub use cron_parser::*;
 pub use cron_schedule::*;
 pub use cron_specification::*;
@@ -19,6 +18,8 @@ mod cron_interval;
 mod cron_parser;
 mod cron_schedule;
 mod cron_specification;
+mod cron_interval_iterator;
+
 
 #[cfg(test)]
 mod tests {
