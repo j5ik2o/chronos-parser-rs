@@ -2,7 +2,7 @@ use chrono::{DateTime, TimeZone};
 
 use crate::{CronEvaluator, Expr};
 
-pub trait Specification<T> {
+pub trait Specification<T>: Clone {
   fn is_satisfied_by(&self, arg: &T) -> bool;
 }
 
@@ -22,3 +22,4 @@ impl<Tz: TimeZone> Specification<DateTime<Tz>> for CronSpecification {
     CronEvaluator::new(datetime).eval(&self.expr)
   }
 }
+
