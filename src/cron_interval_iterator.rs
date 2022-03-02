@@ -56,10 +56,14 @@ for CronIntervalIterator<Tz, S>
 }
 
 impl<Tz: TimeZone, S: Specification<DateTime<Tz>>> CronIntervalIterator<Tz, S> {
+    /// Returns the timezone of CronIntervalIterator.<br/>
+    /// CronIntervalIteratorのタイムゾーンを返す。
     pub fn timezone(&self) -> &Tz {
         &self.timezone
     }
 
+    /// Returns the CronInterval.<br/>
+    /// CronIntervalを返す。
     pub fn cron_interval(&self) -> Rc<CronInterval<Tz, S>> {
         self.cron_interval.clone()
     }

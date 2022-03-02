@@ -64,10 +64,14 @@ mod tests {
   fn test_iterator() {
     let dt: chrono::DateTime<Utc> = Utc.ymd(2021, 1, 1).and_hms(1, 1, 0);
 
-    let cs: CronSchedule<Utc> = CronSchedule::new("0-59/30 0-23/2 * * *").unwrap();
-    let itr: crate::CronIntervalIterator<Utc, CronSpecification> = cs.upcoming(dt);
+    let itr = CronSchedule::new("0-59/30 0-23/2 * * *").unwrap().upcoming(dt);
 
-    itr.take(5).for_each(|e| println!("{:?}", e));
+    let dt_vec  = itr.take(5).collect::<Vec<_>>();
+    assert_eq!(dt_vec[0], Utc.ymd(2021, 1, 1).and_hms(2, 0, 0));
+    assert_eq!(dt_vec[1], Utc.ymd(2021, 1, 1).and_hms(2, 30, 0));
+    assert_eq!(dt_vec[2], Utc.ymd(2021, 1, 1).and_hms(4, 0, 0));
+    assert_eq!(dt_vec[3], Utc.ymd(2021, 1, 1).and_hms(4, 30, 0));
+    assert_eq!(dt_vec[4], Utc.ymd(2021, 1, 1).and_hms(6, 0, 0));
     /*
 2021-01-01T02:00:00Z
 2021-01-01T02:30:00Z
