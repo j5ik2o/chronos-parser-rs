@@ -1,9 +1,11 @@
-# cargo-features = ["edition2021"]
-
 [package]
 name = "chronos-parser-rs"
 version = "0.1.1"
 authors = ["Junichi Kato <j5ik2o@gmail.com>"]
+description = "A Rust crate for CROND parser."
+repository="https://github.com/j5ik2o/prop-check-rs"
+readme = "./README.md"
+license = "MIT OR Apache-2.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
