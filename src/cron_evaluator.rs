@@ -1,4 +1,4 @@
-use chrono::{Datelike, DateTime, NaiveDate, Timelike, TimeZone};
+use chrono::{DateTime, Datelike, NaiveDate, TimeZone, Timelike};
 
 use crate::Expr;
 
@@ -17,8 +17,8 @@ impl Environment {
   }
 }
 
-fn get_days_from_month(year: i32, month: u32) -> i64 {
-  NaiveDate::from_ymd(
+fn get_days_from_month(year: i32, month: u32) -> Option<i64> {
+  NaiveDate::from_ymd_opt(
     match month {
       12 => year + 1,
       _ => year,
@@ -29,8 +29,10 @@ fn get_days_from_month(year: i32, month: u32) -> i64 {
     },
     1,
   )
-  .signed_duration_since(NaiveDate::from_ymd(year, month, 1))
-  .num_days()
+  .map(|d| {
+    d.signed_duration_since(NaiveDate::from_ymd_opt(year, month, 1).unwrap())
+      .num_days()
+  })
 }
 
 impl<'a, Tz: TimeZone> CronEvaluator<'a, Tz> {
@@ -47,27 +49,16 @@ impl<'a, Tz: TimeZone> CronEvaluator<'a, Tz> {
         box days,
         box day_of_weeks,
       } => {
-        let last_day = get_days_from_month(self.instant.date().year(), self.instant.date().month());
-        let fmins = self.visit0(
-          &Environment::new(self.instant.time().minute() as u8, 59),
-          mins,
-        );
-        let fhours = self.visit0(
-          &Environment::new(self.instant.time().hour() as u8, 23),
-          hours,
-        );
+        let last_day =
+          get_days_from_month(self.instant.date_naive().year(), self.instant.date_naive().month()).unwrap();
+        let fmins = self.visit0(&Environment::new(self.instant.time().minute() as u8, 59), mins);
+        let fhours = self.visit0(&Environment::new(self.instant.time().hour() as u8, 23), hours);
         let fdays = self.visit0(
-          &Environment::new(self.instant.date().day() as u8, last_day as u8),
+          &Environment::new(self.instant.date_naive().day() as u8, last_day as u8),
           days,
         );
-        let fmonths = self.visit0(
-          &Environment::new(self.instant.date().month() as u8, 12),
-          months,
-        );
-        let fday_of_weeks = self.visit0(
-          &Environment::new(self.instant.time().minute() as u8, 7),
-          day_of_weeks,
-        );
+        let fmonths = self.visit0(&Environment::new(self.instant.date_naive().month() as u8, 12), months);
+        let fday_of_weeks = self.visit0(&Environment::new(self.instant.time().minute() as u8, 7), day_of_weeks);
         fmins && fhours && fdays && fmonths && fday_of_weeks
       }
       _ => false,
@@ -117,7 +108,7 @@ mod tests {
 
   #[test]
   fn test_anytime() {
-    let date_time = Utc.ymd(2021, 1, 1).and_hms(1, 1, 1);
+    let date_time = Utc.with_ymd_and_hms(2021, 1, 1, 1, 1, 1).unwrap();
     let cron_evaluator = CronEvaluator::new(&date_time);
     let expr = Expr::CronExpr {
       mins: Box::from(Expr::AnyValueExpr),
@@ -132,7 +123,7 @@ mod tests {
 
   #[test]
   fn test_point_time() {
-    let date_time = Utc.ymd(2021, 1, 1).and_hms(1, 1, 1);
+    let date_time = Utc.with_ymd_and_hms(2021, 1, 1, 1, 1, 1).unwrap();
     let cron_evaluator = CronEvaluator::new(&date_time);
     let expr = Expr::CronExpr {
       mins: Box::from(Expr::ValueExpr(1)),

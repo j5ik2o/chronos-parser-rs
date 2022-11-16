@@ -22,4 +22,3 @@ impl<Tz: TimeZone> Specification<DateTime<Tz>> for CronSpecification {
     CronEvaluator::new(datetime).eval(&self.expr)
   }
 }
-

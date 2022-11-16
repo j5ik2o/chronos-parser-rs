@@ -1,9 +1,7 @@
 use pom::parser::*;
 
 use crate::Expr;
-use crate::Expr::{
-  AnyValueExpr, CronExpr, LastValueExpr, ListExpr, NoOp, PerExpr, RangeExpr, ValueExpr,
-};
+use crate::Expr::{AnyValueExpr, CronExpr, LastValueExpr, ListExpr, NoOp, PerExpr, RangeExpr, ValueExpr};
 
 fn min_digit<'a>() -> Parser<'a, u8, Expr> {
   (one_of(b"12345") + one_of(b"0123456789")).map(|(e1, e2)| ValueExpr((e1 - 48) * 10 + e2 - 48))
@@ -147,13 +145,9 @@ mod tests {
 
   #[test]
   fn test_digit_instruction() {
-    let result = (digit_instruction!(min_digit()) - end())
-      .parse(b"*")
-      .unwrap();
+    let result = (digit_instruction!(min_digit()) - end()).parse(b"*").unwrap();
     assert_eq!(result, AnyValueExpr);
-    let result = (digit_instruction!(min_digit()) - end())
-      .parse(b"*/2")
-      .unwrap();
+    let result = (digit_instruction!(min_digit()) - end()).parse(b"*/2").unwrap();
     assert_eq!(
       result,
       PerExpr {
@@ -161,9 +155,7 @@ mod tests {
         option: Box::from(ValueExpr(2))
       }
     );
-    let result = (digit_instruction!(min_digit()) - end())
-      .parse(b"1-10/2")
-      .unwrap();
+    let result = (digit_instruction!(min_digit()) - end()).parse(b"1-10/2").unwrap();
     assert_eq!(
       result,
       RangeExpr {
@@ -172,25 +164,15 @@ mod tests {
         per_option: Box::from(ValueExpr(2))
       }
     );
-    let result = (digit_instruction!(min_digit()) - end())
-      .parse(b"1,2,3")
-      .unwrap();
-    assert_eq!(
-      result,
-      ListExpr(vec![ValueExpr(1), ValueExpr(2), ValueExpr(3)])
-    );
-    let result = (digit_instruction!(min_digit()) - end())
-      .parse(b"1")
-      .unwrap();
+    let result = (digit_instruction!(min_digit()) - end()).parse(b"1,2,3").unwrap();
+    assert_eq!(result, ListExpr(vec![ValueExpr(1), ValueExpr(2), ValueExpr(3)]));
+    let result = (digit_instruction!(min_digit()) - end()).parse(b"1").unwrap();
     assert_eq!(result, ValueExpr(1));
   }
 
   #[test]
   fn test_list() {
-    let s = (0..=59)
-      .map(|v| v.to_string())
-      .collect::<Vec<_>>()
-      .join(",");
+    let s = (0..=59).map(|v| v.to_string()).collect::<Vec<_>>().join(",");
     let result = (list(min_digit()) - end()).parse(s.as_bytes()).unwrap();
     let values = (0..=59).map(|v| ValueExpr(v)).collect::<Vec<_>>();
     assert_eq!(result, ListExpr(values));
@@ -219,9 +201,7 @@ mod tests {
   fn test_asterisk_per() {
     for n in 0..59 {
       let s: &str = &format!("*/{:<02}", n);
-      let result = (asterisk_per(min_digit()) - end())
-        .parse(s.as_bytes())
-        .unwrap();
+      let result = (asterisk_per(min_digit()) - end()).parse(s.as_bytes()).unwrap();
       assert_eq!(
         result,
         PerExpr {

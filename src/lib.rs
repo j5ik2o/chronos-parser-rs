@@ -15,11 +15,10 @@ pub use cron_specification::*;
 mod ast;
 mod cron_evaluator;
 mod cron_interval;
+mod cron_interval_iterator;
 mod cron_parser;
 mod cron_schedule;
 mod cron_specification;
-mod cron_interval_iterator;
-
 
 #[cfg(test)]
 mod tests {
