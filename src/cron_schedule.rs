@@ -10,8 +10,7 @@ use crate::{CronInterval, CronIntervalIterator, CronParser, CronSpecification, E
 /// CROND文字列からCronIntervalやCronIntervalIteratorを返すFacade。
 pub struct CronSchedule<Tz>
 where
-  Tz: TimeZone,
-{
+  Tz: TimeZone, {
   expr: Expr,
   phantom: PhantomData<Tz>,
 }
@@ -62,22 +61,20 @@ mod tests {
 
   #[test]
   fn test_iterator() {
-    let dt: chrono::DateTime<Utc> = Utc.ymd(2021, 1, 1).and_hms(1, 1, 0);
+    let dt: chrono::DateTime<Utc> = Utc.with_ymd_and_hms(2021, 1, 1, 1, 1, 0).unwrap();
 
     let itr = CronSchedule::new("0-59/30 0-23/2 * * *").unwrap().upcoming(dt);
 
-    let dt_vec  = itr.take(5).collect::<Vec<_>>();
-    assert_eq!(dt_vec[0], Utc.ymd(2021, 1, 1).and_hms(2, 0, 0));
-    assert_eq!(dt_vec[1], Utc.ymd(2021, 1, 1).and_hms(2, 30, 0));
-    assert_eq!(dt_vec[2], Utc.ymd(2021, 1, 1).and_hms(4, 0, 0));
-    assert_eq!(dt_vec[3], Utc.ymd(2021, 1, 1).and_hms(4, 30, 0));
-    assert_eq!(dt_vec[4], Utc.ymd(2021, 1, 1).and_hms(6, 0, 0));
-    /*
-2021-01-01T02:00:00Z
-2021-01-01T02:30:00Z
-2021-01-01T04:00:00Z
-2021-01-01T04:30:00Z
-2021-01-01T06:00:00Z
-    */
+    let dt_vec = itr.take(5).collect::<Vec<_>>();
+    assert_eq!(dt_vec[0], Utc.with_ymd_and_hms(2021, 1, 1, 2, 0, 0).unwrap());
+    assert_eq!(dt_vec[1], Utc.with_ymd_and_hms(2021, 1, 1, 2, 30, 0).unwrap());
+    assert_eq!(dt_vec[2], Utc.with_ymd_and_hms(2021, 1, 1, 4, 0, 0).unwrap());
+    assert_eq!(dt_vec[3], Utc.with_ymd_and_hms(2021, 1, 1, 4, 30, 0).unwrap());
+    assert_eq!(dt_vec[4], Utc.with_ymd_and_hms(2021, 1, 1, 6, 0, 0).unwrap());
+    // 2021-01-01T02:00:00Z
+    // 2021-01-01T02:30:00Z
+    // 2021-01-01T04:00:00Z
+    // 2021-01-01T04:30:00Z
+    // 2021-01-01T06:00:00Z
   }
 }

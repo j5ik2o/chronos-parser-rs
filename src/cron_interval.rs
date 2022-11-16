@@ -45,12 +45,7 @@ impl<Tz: TimeZone, S: Specification<DateTime<Tz>>> CronInterval<Tz, S> {
   /// CronIntervalIteratorを返す。
   pub fn iter(&self, timezone: Tz) -> CronIntervalIterator<Tz, S> {
     let timestamp = self.underlying.as_lower_limit().as_value().unwrap();
-    let date_time = timezone.timestamp_millis(*timestamp);
-    CronIntervalIterator::new(
-      timezone,
-      date_time.clone(),
-      date_time,
-      Rc::new(self.clone()),
-    )
+    let date_time = timezone.timestamp_millis_opt(*timestamp).unwrap();
+    CronIntervalIterator::new(timezone, date_time.clone(), date_time, Rc::new(self.clone()))
   }
 }
