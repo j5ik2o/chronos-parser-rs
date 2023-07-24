@@ -1,6 +1,6 @@
 [package]
 name = "chronos-parser-rs"
-version = "0.1.250"
+version = "0.1.251"
 authors = ["Junichi Kato <j5ik2o@gmail.com>"]
 description = "A Rust crate for CROND parser."
 repository="https://github.com/j5ik2o/chronos-parser-rs"
