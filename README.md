@@ -9,7 +9,16 @@
 
 A Rust crate for CROND parser.
 
-## usage
+## Installation
+
+Add the following configuration to `Cargo.toml`.
+
+```toml
+[dependencies]
+chronos-parser-rs = "0.1.XXX"
+```
+
+## Usage
 
 ```rust
 // Create a new cron schedule
