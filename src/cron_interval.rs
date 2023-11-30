@@ -8,7 +8,7 @@ use crate::{CronIntervalIterator, Specification};
 
 /// A structure representing an interval of CROND date and time.<br/>
 /// CROND日時の区間を表す構造体。
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct CronInterval<Tz: TimeZone, S: Specification<DateTime<Tz>>> {
   pub(crate) underlying: Interval<i64>,
   pub(crate) cron_specification: S,

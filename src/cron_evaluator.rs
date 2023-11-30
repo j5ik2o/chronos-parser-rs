@@ -6,6 +6,7 @@ pub struct CronEvaluator<'a, Tz: TimeZone> {
   instant: &'a DateTime<Tz>,
 }
 
+#[derive(Debug, Clone)]
 pub struct Environment {
   now: u8,
   max: u8,

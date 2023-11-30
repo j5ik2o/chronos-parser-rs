@@ -6,7 +6,7 @@ pub trait Specification<T>: Clone {
   fn is_satisfied_by(&self, arg: &T) -> bool;
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct CronSpecification {
   expr: Expr,
 }

@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 /// Iterator for The CronInterval.<br/>
 /// CronIntervalのためのイテレータ。
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct CronIntervalIterator<Tz: TimeZone, S: Specification<DateTime<Tz>>> {
   timezone: Tz,
   curr: DateTime<Tz>,
