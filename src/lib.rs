@@ -1,7 +1,6 @@
 #![allow(incomplete_features)]
 #![allow(dead_code)]
 #![feature(box_patterns)]
-#![feature(once_cell)]
 
 pub use ast::*;
 pub use cron_evaluator::*;

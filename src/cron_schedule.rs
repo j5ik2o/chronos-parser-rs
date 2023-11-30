@@ -8,6 +8,7 @@ use crate::{CronInterval, CronIntervalIterator, CronParser, CronSpecification, E
 
 /// Facade that returns a CronInterval or CronIntervalIterator from a CROND string.<br/>
 /// CROND文字列からCronIntervalやCronIntervalIteratorを返すFacade。
+#[derive(Debug, Clone)]
 pub struct CronSchedule<Tz>
 where
   Tz: TimeZone, {
