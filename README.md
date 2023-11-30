@@ -21,3 +21,8 @@ A Rust crate for CROND parser.
 - [j5ik2o/chronos-scheduler-rs](https://github.com/j5ik2o/chronos-scheduler-rs)
 - [j5ik2o/oni-comb-rs](https://github.com/j5ik2o/oni-comb-rs)
 - [j5ik2o/intervals-rs](https://github.com/j5ik2o/intervals-rs)
+
+## Implementations for Scala
+
+- [j5ik2o/chronos-scheduler-scala](https://github.com/j5ik2o/chronos-scheduler-scala)
+- [j5ik2o/chronos-parser-scala](https://github.com/j5ik2o/chronos-parser-scala)
