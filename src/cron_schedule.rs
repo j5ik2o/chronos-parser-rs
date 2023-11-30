@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use chrono::{DateTime, TimeZone};
 use intervals_rs::LimitValue;
 
@@ -32,8 +32,12 @@ impl<Tz: TimeZone> CronSchedule<Tz> {
   ///   - If CrondParser::parse succeeds
   ///   - CrondParser::parseに成功した場合
   pub fn new(crond_string: &str) -> Result<Self> {
+    let result = CronParser::parse(crond_string).to_result();
+    if result.is_err() {
+      return Err(anyhow!("Failed to parse crond string: {}", result.err().unwrap()));
+    }
     Ok(Self {
-      expr: CronParser::parse(crond_string)?,
+      expr: result.unwrap(),
       phantom: PhantomData,
     })
   }
