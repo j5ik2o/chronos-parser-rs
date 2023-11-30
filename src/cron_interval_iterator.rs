@@ -92,7 +92,7 @@ mod tests {
   fn test_iterator() {
     let dt = Utc.with_ymd_and_hms(2021, 1, 1, 1, 1, 0).unwrap();
 
-    let expr = CronParser::parse("0-59/30 0-23/2 * * *").unwrap();
+    let expr = CronParser::parse("0-59/30 0-23/2 * * *").to_result().unwrap();
     let interval = CronInterval::new(
       LimitValue::Limit(dt),
       LimitValue::Limitless,
