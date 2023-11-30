@@ -1,29 +1,41 @@
-use oni_comb_parser_rs::prelude::*;
 use crate::Expr;
 use crate::Expr::{AnyValueExpr, CronExpr, LastValueExpr, ListExpr, NoOp, PerExpr, RangeExpr, ValueExpr};
+use oni_comb_parser_rs::prelude::*;
 
 fn min_digit<'a>() -> Parser<'a, u8, Expr> {
-  (elm_of(b"12345") + elm_of(b"0123456789")).attempt().map(|(e1, e2)| ValueExpr((e1 - 48) * 10 + e2 - 48))
+  (elm_of(b"12345") + elm_of(b"0123456789"))
+    .attempt()
+    .map(|(e1, e2)| ValueExpr((e1 - 48) * 10 + e2 - 48))
     | (elm(b'0') * elm_of(b"0123456789")).attempt().map(|e| ValueExpr(e - 48))
     | (elm_of(b"0123456789")).map(|e| ValueExpr(e - 48))
 }
 
 fn hour_digit<'a>() -> Parser<'a, u8, Expr> {
-  (elm(b'2') + elm_of(b"0123")).attempt().map(|(e1, e2)| ValueExpr((e1 - 48) * 10 + e2 - 48))
-    | (elm(b'1') + elm_of(b"0123456789")).attempt().map(|(e1, e2)| ValueExpr((e1 - 48) * 10 + e2 - 48))
+  (elm(b'2') + elm_of(b"0123"))
+    .attempt()
+    .map(|(e1, e2)| ValueExpr((e1 - 48) * 10 + e2 - 48))
+    | (elm(b'1') + elm_of(b"0123456789"))
+      .attempt()
+      .map(|(e1, e2)| ValueExpr((e1 - 48) * 10 + e2 - 48))
     | (elm(b'0') * elm_of(b"0123456789")).attempt().map(|e| ValueExpr(e - 48))
     | elm_of(b"0123456789").map(|e| ValueExpr(e - 48))
 }
 
 fn day_digit<'a>() -> Parser<'a, u8, Expr> {
-  (elm(b'3') + elm_of(b"01")).attempt().map(|(e1, e2)| ValueExpr((e1 - 48) * 10 + e2 - 48))
-    | (elm_of(b"12") + elm_of(b"0123456789")).attempt().map(|(e1, e2)| ValueExpr((e1 - 48) * 10 + e2 - 48))
+  (elm(b'3') + elm_of(b"01"))
+    .attempt()
+    .map(|(e1, e2)| ValueExpr((e1 - 48) * 10 + e2 - 48))
+    | (elm_of(b"12") + elm_of(b"0123456789"))
+      .attempt()
+      .map(|(e1, e2)| ValueExpr((e1 - 48) * 10 + e2 - 48))
     | (elm(b'0') * elm_of(b"123456789")).attempt().map(|e| ValueExpr(e - 48))
     | elm_of(b"123456789").map(|e| ValueExpr(e - 48))
 }
 
 fn month_digit<'a>() -> Parser<'a, u8, Expr> {
-  (elm(b'1') + elm_of(b"012")).attempt().map(|(e1, e2)| ValueExpr((e1 - 48) * 10 + e2 - 48))
+  (elm(b'1') + elm_of(b"012"))
+    .attempt()
+    .map(|(e1, e2)| ValueExpr((e1 - 48) * 10 + e2 - 48))
     | (elm(b'0') * elm_of(b"123456789")).attempt().map(|e| ValueExpr(e - 48))
     | elm_of(b"123456789").map(|e| ValueExpr(e - 48))
 }
@@ -114,8 +126,8 @@ impl CronParser {
 
 #[cfg(test)]
 mod tests {
-  use std::env;
   use super::*;
+  use std::env;
 
   #[test]
   fn test_instruction() {
@@ -145,9 +157,15 @@ mod tests {
 
   #[test]
   fn test_digit_instruction() {
-    let result = (digit_instruction!(min_digit()) - end()).parse(b"*").to_result().unwrap();
+    let result = (digit_instruction!(min_digit()) - end())
+      .parse(b"*")
+      .to_result()
+      .unwrap();
     assert_eq!(result, AnyValueExpr);
-    let result = (digit_instruction!(min_digit()) - end()).parse(b"*/2").to_result().unwrap();
+    let result = (digit_instruction!(min_digit()) - end())
+      .parse(b"*/2")
+      .to_result()
+      .unwrap();
     assert_eq!(
       result,
       PerExpr {
@@ -155,7 +173,10 @@ mod tests {
         option: Box::from(ValueExpr(2))
       }
     );
-    let result = (digit_instruction!(min_digit()) - end()).parse(b"1-10/2").to_result().unwrap();
+    let result = (digit_instruction!(min_digit()) - end())
+      .parse(b"1-10/2")
+      .to_result()
+      .unwrap();
     assert_eq!(
       result,
       RangeExpr {
@@ -164,9 +185,15 @@ mod tests {
         per_option: Box::from(ValueExpr(2))
       }
     );
-    let result = (digit_instruction!(min_digit()) - end()).parse(b"1,2,3").to_result().unwrap();
+    let result = (digit_instruction!(min_digit()) - end())
+      .parse(b"1,2,3")
+      .to_result()
+      .unwrap();
     assert_eq!(result, ListExpr(vec![ValueExpr(1), ValueExpr(2), ValueExpr(3)]));
-    let result = (digit_instruction!(min_digit()) - end()).parse(b"1").to_result().unwrap();
+    let result = (digit_instruction!(min_digit()) - end())
+      .parse(b"1")
+      .to_result()
+      .unwrap();
     assert_eq!(result, ValueExpr(1));
   }
 
@@ -201,7 +228,10 @@ mod tests {
   fn test_asterisk_per() {
     for n in 0..59 {
       let s: &str = &format!("*/{:<02}", n);
-      let result = (asterisk_per(min_digit()) - end()).parse(s.as_bytes()).to_result().unwrap();
+      let result = (asterisk_per(min_digit()) - end())
+        .parse(s.as_bytes())
+        .to_result()
+        .unwrap();
       assert_eq!(
         result,
         PerExpr {
