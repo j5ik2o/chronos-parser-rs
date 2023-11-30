@@ -12,14 +12,26 @@ A Rust crate for CROND parser.
 ## usage
 
 ```rust
+// Create a new cron schedule
 let cron_schedule = CronSchedule::new("0-59/30 0-23/2 * * *").unwrap();
 
+// Create a DateTime object representing January 1, 2021, 1:01:00 AM (UTC)
 let dt: chrono::DateTime<Utc> = Utc.with_ymd_and_hms(2021, 1, 1, 1, 1, 0).unwrap();
+// Return an iterator that calculates the scheduled execution times after this date and time
 let iterator = cron_schedule.upcoming(dt);
 
-for next_trigger in itr.take(5) {
+// Print the next 5 scheduled execution times
+for next_trigger in iterator.take(5) {
   println!("{}", next_trigger);
 }
+```
+
+```stdout
+2021-01-01T02:00:00Z
+2021-01-01T02:30:00Z
+2021-01-01T04:00:00Z
+2021-01-01T04:30:00Z
+2021-01-01T06:00:00Z
 ```
 
 ## Related Crates
