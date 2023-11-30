@@ -23,7 +23,7 @@ impl<Tz: TimeZone> CronSchedule<Tz> {
   ///
   /// * crond_string - CROND形式文字列
   ///
-  /// # Retun values(戻り値)
+  /// # Return values(戻り値)
   ///
   /// * Err:
   ///   - If CrondParser::parse fails
