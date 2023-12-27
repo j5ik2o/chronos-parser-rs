@@ -11,7 +11,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.76"
+anyhow = "1.0.77"
 intervals-rs = "0.0.5"
 chrono = "0.4.31"
 rust-fp-categories = "0.0.5"
