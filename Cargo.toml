@@ -19,4 +19,4 @@ rust-fp-pfds = "0.0.4"
 oni-comb-parser-rs = "0.0.326"
 
 [dev-dependencies]
-env_logger = "0.10.1"
+env_logger = "0.10.2"
