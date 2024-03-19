@@ -16,7 +16,7 @@ intervals-rs = "0.0.5"
 chrono = "0.4.35"
 rust-fp-categories = "0.0.5"
 rust-fp-pfds = "0.0.4"
-oni-comb-parser-rs = "0.0.385"
+oni-comb-parser-rs = "0.0.386"
 
 [dev-dependencies]
 env_logger = "0.11.3"
